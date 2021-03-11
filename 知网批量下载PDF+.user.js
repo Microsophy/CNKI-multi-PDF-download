@@ -1,12 +1,16 @@
 // ==UserScript==
-// @name         知网批量下载PDF+
+// @name         知网批量下载PDF+丨CNKI Multi PDF Download
 // @namespace    http://tampermonkey.net/
-// @version      0.3
+// @icon         https://kdoc.cnki.net/favicon.ico
+// @version      0.4
 // @description  用于知网批量下载PDF，保存下载信息到txt
 // @author       Juicpt(因为不熟悉js里的属性方法，为了方便添加新功能，24用jQuery重写)
 // @match        *://*.cnki.net/*
 // @include      *://*.cnki.net.*
 // @include      *://*/cnki.net/*
+// @include      */kns/brief/*
+// @include      */DefaultResult/Index*
+// @include      */kns8/AdvSearch*
 // @run-at       document-end
 // @grant        unsafeWindow
 // ==/UserScript==
@@ -17,6 +21,7 @@ var $ = unsafeWindow.jQuery;
     $('<a>批量下载PDF</a>').appendTo('.SavePoint,.result-con-l').click(downLoad).attr({'id':'pdfdown','title':'此页面若有勾选，则下载勾选部分；没有则默认下载当前页面全部搜索结果'}).addClass('btn-search-his');
     $('<a>信息</a>').appendTo('.SavePoint,.result-con-l').click(getInfo).attr({'id':'info','title':'导出简要信息，用于核对下载情况和辅助重命名'}).addClass('btn-search-his');
     var tr3 = [];
+    var info_count = 0;
     // 操作对象
     if (location.pathname.match('/kns/'))
     {
@@ -42,7 +47,7 @@ var $ = unsafeWindow.jQuery;
     }
     // 收集标题、第一作者、发表时间等信息
     function getInfo(){
-        var info = '序号→发表时间→第一作者→文献标题→页数／下载状态\n' ;
+        var info = '序号→发表时间→第一作者→文献标题→下载状态\n' ;
         var trselected = selectBox(tr3);
         info += trselected.map(getInfoInEach).get().join('');
         var txtname = $(tr3).find('a.fz14,.author_flag,.GridRightColumn,.author').find('font.Mark').eq(0).text().trim() + '.txt';
@@ -54,13 +59,13 @@ var $ = unsafeWindow.jQuery;
     function downLoad(){
         var trselected = selectBox(tr3);
         trselected.each(function(){
-            var btdown=$(this).find('a.briefDl_D,.briefDl_Y,.downloadlink.icon-download')[0];
+            var btdown=$(this).find('a.briefDl_D,.briefDl_Y,.downloadlink.icon-download,.icon-textlink')[0];
             if (btdown) btdown.click();
         });
     }
     // 获取信息（子）
     function getInfoInEach(index){
-        var pnum = index + 1;
+        var pnum = index + 1 + info_count;
         var ptime = $(this).find('td:eq(4),label:contains(发表时间),span.date').text().replace('发表时间：','').trim().substr(0,10);
         var pname = $(this).find('.author_flag,.author,.authorinfo p a:eq(0)').text().split(';')[0].replace('，','').trim().split('  ').pop();
         pname = pname.length > 15 ? pname.split(' ')[1] : pname;
