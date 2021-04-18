@@ -2,15 +2,12 @@
 // @name         知网批量下载PDF+丨CNKI Multi PDF Download
 // @namespace    http://tampermonkey.net/
 // @icon         https://kdoc.cnki.net/favicon.ico
-// @version      0.4
+// @version      0.5
 // @description  用于知网批量下载PDF，保存下载信息到txt
 // @author       Juicpt(因为不熟悉js里的属性方法，为了方便添加新功能，24用jQuery重写)
-// @match        *://*.cnki.net/*
-// @include      *://*.cnki.net.*
-// @include      *://*/cnki.net/*
 // @include      */kns/brief/*
-// @include      */DefaultResult/Index*
-// @include      */kns8/AdvSearch*
+// @include      */kns*/AdvSearch*
+// @include      */kns*/defaultresult/*
 // @run-at       document-end
 // @grant        unsafeWindow
 // ==/UserScript==
@@ -23,7 +20,7 @@ var $ = unsafeWindow.jQuery;
     var tr3 = [];
     var info_count = 0;
     // 操作对象
-    if (location.pathname.match('/kns/'))
+    if (location.pathname.match('/kns/brief/'))
     {
         tr3 = $('tr[bgcolor],.GridDoubleRow,.GridSingleRow');
         replaceUrl(tr3);
@@ -33,6 +30,15 @@ var $ = unsafeWindow.jQuery;
         $('#briefBox').ajaxStop(function(){
             tr3 = $('.result-table-list tbody tr,.result-detail-list dd');
             replaceUrl(tr3);
+            /*
+            // 用于连续编号
+            if($(".countPageMark")){
+                var page_count = $(".countPageMark").text().trim().split("/")[0];
+                var page_per = $("#perPageDiv span").text().trim();
+                info_count = (page_count-1) * page_per;
+                info_count = info_count > 0 ? info_count : 0 ;
+            }
+            */
         });
     }
     // 将caj下载链接替换成pdf
